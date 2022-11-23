@@ -1,61 +1,79 @@
 var express = require('express');
-var path=require('path')
+var path = require('path');
+var fs = require('fs');
+
+
 var app = express();
-var fs=require('fs');
-const PORT = 3000;
-app.set('views',path.join(__dirname ,'views'));
-app.set('view engine','ejs');
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.use(express.json());
-app.use(express.urlencoded({extended:false}));
-app.use(express.static(path.join(__dirname,'public')));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/',function(req,res){
-    res.render('login');
+  res.render('login');
 });
 
-
-
-app.post('/login',function(req,res){
-//TODO 
+app.get('/home',function(req,res){
+res.render('home');
 });
 
-var x = {name:"mohamed",age:27,username:"ali92",password:"abc123"};
-var s = JSON.stringify(x);
-fs.writeFileSync("users.json",s);
+app.get('/registration',function(req,res){
+    res.render('resgistration');
+});
 
-var data=fs.readFileSync("users.json");
-var ob=JSON.parse(data);
+app.get('/cities',function(req,res){
+    res.render('cities');
+});
+app.get('/islands',function(req,res){
+    res.render('islands');
+});
+app.get('/wanttogo',function(req,res){
+    res.render('wanttogo');
+});
 
-var MongoClient=require('mongodb').MongoClient;
-
-MongoClient.connect('mongodb://127.0.0.1:27017',function(err,client){
-    if(err)throw err;
-    var db=client.db("ProjectDB");
-     // db.collection('FirstCollection').insertOne({id:85,firstName:'ramez',lastName:'rtrt'});
-
-
-
-    db.collection('FirstCollection').find().toArray(function(err,results){
-        if(err)throw err;
-    // console.log(results);
+////////////////////////////
+app.post('/',function(req,res){
+   var username=req.body.username;
+   var password=req.body.password;
+  console.log(username);
+  var MongoClient = require('mongodb').MongoClient;
+  MongoClient.connect("mongodb://127.0.0.1:27017",function(err,client){
+  if(err) throw err;
+  var db = client.db('ProjectDB');
+  db.collection('users').find().toArray(function(err,result){
+    var flag=0; 
+    for (i = 0; i < result.length; i++) {
+        var str=JSON.stringify(result[i]);
+        var user=JSON.parse(str);
+        if(user.username==username&&user.password==password)
+        flag=1; 
+     }
+     if(flag==1)
+        res.redirect('home');
     });
-
-
-
+  
+ 
 });
+});
+//////////////
 
-if(process.env.PORT){
-    app.listen(process.env.PORT,function(){console.log("server started")});
-}else
-app.listen(3000,function(){console.log("server started on port 3000")});
+{/* <form method="POST">
+Username:<br>
+<input type="text" name="username">
+<br>
+Password:<br>
+<input type="password" name="password">
+<br><br>
+<input type="submit" value="Login"> */}
 
-
-
-
-
-
-// app.listen(3000);
-
-// console.log(ob);
-// console.log(s);
+// var MongoClient = require('mongodb').MongoClient;
+// MongoClient.connect("mongodb://127.0.0.1:27017",function(err,client){
+//   if(err) throw err;
+//   var db = client.db('ProjectDB');
+//   db.collection('users').insertOne({username:"ramez",password:"1234"});
+// });
+app.listen(3000);
