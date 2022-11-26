@@ -2,9 +2,9 @@ var express = require("express");
 var path = require("path");
 var fs = require("fs");
 
+
 var app = express();
 
-// view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", function (req, res) {
-    res.render("login");
+    res.render("login",{error:''});
 });
 
 app.get("/home", function (req, res) {
@@ -27,14 +27,34 @@ app.get("/registration", function (req, res) {
 app.get("/cities", function (req, res) {
     res.render("cities");
 });
+app.get("/bali", function (req, res) {
+    res.render("bali");
+});
+app.get("/santorini", function (req, res) {
+    res.render("santorini");
+});
+app.get("/paris", function (req, res) {
+    res.render("paris");
+});
+app.get("/hiking", function (req, res) {
+    res.render("hiking");
+});
+app.get("/inca", function (req, res) {
+    res.render("inca");
+});
+app.get("/annapurna", function (req, res) {
+    res.render("annapurna");
+});
+app.get("/rome", function (req, res) {
+    res.render("rome");
+});
+
 app.get("/islands", function (req, res) {
     res.render("islands");
 });
 app.get("/wanttogo", function (req, res) {
     res.render("wanttogo");
 });
-
-////////////////////////////
 var MongoClient = require("mongodb").MongoClient;
 const URI = "mongodb://127.0.0.1:27017";
 app.post("/", function (req, res) {
@@ -52,7 +72,11 @@ app.post("/", function (req, res) {
                     var user = JSON.parse(str);
                     if (user.username == username && user.password == password) flag = 1;
                 }
-                if (flag == 1) res.redirect("home");
+                if (flag == 1) 
+                     res.redirect("home");
+                else {    
+                    res.render("login",{error:'invalid credentials'});
+                }
             });
     });
 });
