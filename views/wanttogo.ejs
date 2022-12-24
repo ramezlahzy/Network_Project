@@ -4,7 +4,6 @@
     <style>
         body {
             background-image: url("background3.jpg");
-            background-repeat: no-repeat;
             background-size: 100%;
         }
 
@@ -38,5 +37,34 @@
             </form>
         </div>
     </nav>
+<!--    <h4 style =" color:white; margin-left:300px "><%= list %></h4>-->
+    <script>
+        var list = '<%= list %>';
+        if(list.length>0)
+        {
+            list = list.split(',');
+            for(var i=0;i<list.length;i++)
+            {
+                var div = document.createElement("div");
+                div.className= 'container'+(i+1);
+                var img = document.createElement("img");
+                img.src="/"+list[i]+".png";
+                img.height = 100;
+                img.width = 100;
+
+                var h4 = document.createElement('h4');
+                h4.textContent= list[i];
+                 h4.style.color= "white";
+                var label = document.createElement('label');
+                label.textContent = "---------"
+                div.appendChild(img);
+
+                div.append(h4);
+                div.append(label)
+                document.body.appendChild(div);
+            }
+        }
+
+    </script>
 </body>
 </html>

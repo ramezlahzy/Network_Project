@@ -5,6 +5,8 @@ var path = require("path");
 var fs = require("fs");
 var alert = require('alert');
 const {ObjectID} = require("mongodb");
+const dest = ['santorini', 'bali', 'rome', 'paris', 'inca', 'annapurna'];
+const destNames = ["santorini island", "bali island", "rome", "paris", "inca trail to machu picchu", "annapurna circuit"];
 
 
 var app = express();
@@ -39,9 +41,9 @@ app.get("/", function (req, res) {
 
 app.get("/home", function (req, res) {
     session = req.session;
-    if (session.userid)
+    if (session.userid) {
         res.render("home");
-    else
+    } else
         res.redirect("/")
 });
 
@@ -86,7 +88,6 @@ app.get("/hiking", function (req, res) {
         res.redirect("/")
 });
 app.get("/inca", function (req, res) {
-    res.render("inca");
     session = req.session;
     if (session.userid)
         res.render("inca");
@@ -94,15 +95,27 @@ app.get("/inca", function (req, res) {
         res.redirect("/")
 });
 app.get("/annapurna", function (req, res) {
-    res.render("santorini");
     session = req.session;
     if (session.userid)
         res.render("annapurna");
     else
         res.redirect("/")
 });
+
+app.post('/search', function (req, res) {
+    var ser = req.body.Search;
+    ser = ser.toLowerCase();
+    var b = [];
+    for (var i = 0; i < destNames.length; i++) {
+        if (destNames[i].includes(ser))
+            b.push(dest[i]);
+    }
+
+    res.render("searchresults", {destinations: b});
+    if(b.length==0)
+        alert("destination not found")
+});
 app.get("/rome", function (req, res) {
-    res.render("santorini");
     session = req.session;
     if (session.userid)
         res.render("rome");
@@ -118,42 +131,86 @@ app.get("/islands", function (req, res) {
         res.redirect("/")
 });
 app.get("/wanttogo", function (req, res) {
-    res.render("santorini");
     session = req.session;
-    if (session.userid)
-        res.render("wanttogo");
-    else
+    if (session.userid) {
+        MongoClient.connect(URI, function (err, client) {
+            if (err) throw err;
+            var db = client.db("myDB");
+            db.collection("myCollection").findOne({username: session.userid}, (err, result) => {
+                res.render("wanttogo", {list: result.wantToGo});
+                console.log(result);
+            })
+
+        });
+
+    } else
         res.redirect("/")
 });
 
-app.post("/wanttogo-paris", function (req, res) {
-addDestinationToDB("paris");
+app.post("/paris", function (req, res) {
+    res.redirect("/paris");
+    addDestinationToDB("paris");
 });
 
 app.post("/wanttogo-bali", function (req, res) {
+    res.redirect("/bali");
     addDestinationToDB("bali");
 });
 
 app.post("/wanttogo-rome", function (req, res) {
-    addDestinationToDB("paris");
-
+    res.redirect("rome")
+    addDestinationToDB("rome");
 });
 
 app.post("/wanttogo-santorini", function (req, res) {
-    addDestinationToDB("paris");
-
+    res.redirect("/santorini");
+    addDestinationToDB("santorini");
 });
 
 app.post("/wanttogo-inca", function (req, res) {
-    addDestinationToDB("paris");
+    res.redirect("/inca");
+    addDestinationToDB("inca");
 
 });
-function addDestinationToDB(dest){
-    console.log(dest);
+
+function addDestinationToDB(dest) {
+    MongoClient.connect(URI, function (err, client) {
+        if (err) throw err;
+        var db = client.db("myDB");
+
+        db.collection("myCollection")
+            .find()
+            .toArray(function (err, result) {
+                for (i = 0; i < result.length; i++) {
+                    var str = JSON.stringify(result[i]);
+                    var user = JSON.parse(str);
+                    if (user.username == session.userid) {
+
+                        var list = JSON.parse(JSON.stringify(user.wantToGo));
+                        console.log(list);
+                        if (!list.includes(dest)) {
+                            list.push(dest);
+
+                        } else
+                            alert("you already added this destination before");
+
+                        console.log(list);
+
+                        db.collection('myCollection').updateOne({username: user.username}, {
+                            $set: {
+                                wantToGo: list
+                            }
+                        });
+
+                    }
+                }
+            });
+    });
 }
 
 app.post("/wanttogo-annapurna", function (req, res) {
-    addDestinationToDB("paris");
+    res.redirect("/annapurna");
+    addDestinationToDB("annapurna");
 });
 var MongoClient = require("mongodb").MongoClient;
 const URI = "mongodb://127.0.0.1:27017";
@@ -163,13 +220,13 @@ app.post("/", function (req, res) {
     var password = req.body.password;
     MongoClient.connect(URI, function (err, client) {
         if (err) throw err;
-        var db = client.db("ProjectDB");
-
-        // db.collection('users').insertOne({username:"shawqy",password:"1234"})
-        db.collection("users")
+        var db = client.db("myDB");
+        var flag = 0;
+        if (user.username == "admin" && user.password == "admin") flag=1
+        db.collection("myCollection")
             .find()
             .toArray(function (err, result) {
-                var flag = 0;
+             
                 for (i = 0; i < result.length; i++) {
                     var str = JSON.stringify(result[i]);
                     var user = JSON.parse(str);
@@ -189,8 +246,6 @@ app.post("/", function (req, res) {
 });
 
 app.post("/register", function (req, res) {
-    // res.render("login", {error: ''});
-
     var username = req.body.username;
     var password = req.body.password;
     console.log(username);
@@ -203,9 +258,9 @@ app.post("/register", function (req, res) {
 
     MongoClient.connect(URI, function (err, client) {
         if (err) throw err;
-        var db = client.db("ProjectDB");
+        var db = client.db("myDB");
 
-        db.collection("users")
+        db.collection("myCollection")
             .find()
             .toArray(function (err, result) {
                 var flag = 0;
@@ -218,14 +273,26 @@ app.post("/register", function (req, res) {
                     res.render("registration");
                     alert("this username is already taken");
                     return;
+                } else {
+                    db.collection('myCollection').insertOne({username: username, password: password, wantToGo: []});
+                    res.redirect("/")
+                    alert("registered successfully");
                 }
 
+
             });
-        db.collection('users').insertOne({username: username, password: password, wantToGo: {}});
-        res.redirect("/")
-        alert("registered successfully");
+
+
     });
 });
 
+const express = require("express");
+const app = express();
+const PORT = process.env.PORT || 3030;
 
+// your code
+
+app.listen(PORT, () => {
+  console.log(`server started on port ${PORT}`);
+});
 app.listen(5000);

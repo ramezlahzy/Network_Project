@@ -4,7 +4,6 @@
     <style>
         body {
             background-image: url("background3.jpg");
-            background-repeat: no-repeat;
             background-size: 100%;
         }
 
@@ -38,5 +37,34 @@
             </form>
         </div>
     </nav>
+    <script>
+        var destinations = '<%= destinations %>';
+        const destinationNames = ["santorini island","bali island","rome","paris","inca trail to machu picchu","annapurna circuit"];;
+        if(destinations.length>0)
+        {
+            destinations = destinations.split(',');
+            for(var i=0;i<destinations.length;i++)
+            {
+                var div = document.createElement("div");
+                div.className= 'container'+(i+1);
+                var img = document.createElement("img");
+                img.src="/"+destinations[i]+".png";
+                img.height = 300;
+                img.width = 193;
+                var linebreak1 = document.createElement('br');
+                var linebreak2 = document.createElement('br');
+                var button = document.createElement('button');
+                button.setAttribute('onclick', "location.href = '/"+destinations[i]+"';");
+                button.id = destinations[i];
+                button.className = "btn btn-secondary ml-3";
+                button.innerHTML = ' View ' + destinationNames[i];
+                div.appendChild(img);
+               // div.appendChild(linebreak1);
+               // div.append(linebreak2);
+                div.append(button);
+                document.body.appendChild(div);
+            }
+        }
+    </script>
 </body>
 </html>
