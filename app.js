@@ -1,4 +1,9 @@
-var express = require("express");
+const express = require("express");
+const app = express();
+const PORT = process.env.PORT || 3030;
+
+
+// var express = require("express");
 const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
 var path = require("path");
@@ -9,7 +14,7 @@ const dest = ['santorini', 'bali', 'rome', 'paris', 'inca', 'annapurna'];
 const destNames = ["santorini island", "bali island", "rome", "paris", "inca trail to machu picchu", "annapurna circuit"];
 
 
-var app = express();
+// var app = express();
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(sessions({
     secret: "thisismysecrctekeyfhrgfgrfrty84fwir767",
@@ -286,9 +291,6 @@ app.post("/register", function (req, res) {
     });
 });
 
-const express = require("express");
-const app = express();
-const PORT = process.env.PORT || 3030;
 
 // your code
 
