@@ -1,8 +1,4 @@
-const express = require("express");
-const app = express();
-const PORT = process.env.PORT || 3030;
-
-// var express = require("express");
+var express = require("express");
 const cookieParser = require("cookie-parser");
 const sessions = require("express-session");
 var path = require("path");
@@ -19,7 +15,7 @@ const destNames = [
   "annapurna circuit",
 ];
 
-// var app = express();
+var app = express();
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(
   sessions({
@@ -208,11 +204,11 @@ app.post("/", function (req, res) {
   MongoClient.connect(URI, function (err, client) {
     if (err) throw err;
     var db = client.db("myDB");
-    var flag = 0;
-    if (user.username == "admin" && user.password == "admin") flag = 1;
+
     db.collection("myCollection")
       .find()
       .toArray(function (err, result) {
+        var flag = 0;
         for (i = 0; i < result.length; i++) {
           var str = JSON.stringify(result[i]);
           var user = JSON.parse(str);
