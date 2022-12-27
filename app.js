@@ -117,8 +117,7 @@ app.get("/islands", function (req, res) {
   else res.redirect("/");
 });
 app.get("/wanttogo", function (req, res) {
-  if(session.userid)
-  res.render("wanttogo", { list: session["wanttogo"] });
+  if (session.userid) res.render("wanttogo", { list: session["wanttogo"] });
   else res.redirect("/");
 });
 
@@ -188,4 +187,4 @@ app.post("/register", function (req, res) {
 app.listen(PORT, () => {
   console.log(`server started on port ${PORT}`);
 });
-app.listen(5000);
+//app.listen(5000);
