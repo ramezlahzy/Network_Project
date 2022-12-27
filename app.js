@@ -145,48 +145,12 @@ app.post("/wanttogo-inca", function (req, res) {
   addDestinationToDB("inca");
 });
 
-function addDestinationToDB(dest) {
-  if (false) {
-    MongoClient.connect(URI, function (err, client) {
-      if (err) throw err;
-      var db = client.db("myDB");
-
-      db.collection("myCollection")
-        .find()
-        .toArray(function (err, result) {
-          for (i = 0; i < result.length; i++) {
-            var str = JSON.stringify(result[i]);
-            var user = JSON.parse(str);
-            if (user.username == session.userid) {
-              var list = JSON.parse(JSON.stringify(user.wantToGo));
-              console.log(list);
-              if (!list.includes(dest)) {
-                list.push(dest);
-              } else alert("you already added this destination before");
-
-              console.log(list);
-
-              db.collection("myCollection").updateOne(
-                { username: user.username },
-                {
-                  $set: {
-                    wantToGo: list,
-                  },
-                }
-              );
-            }
-          }
-        });
-    });
-  }
-}
+function addDestinationToDB(dest) {}
 
 app.post("/wanttogo-annapurna", function (req, res) {
   res.redirect("/annapurna");
   addDestinationToDB("annapurna");
 });
-var MongoClient = require("mongodb").MongoClient;
-const URI = "mongodb://127.0.0.1:27017";
 
 app.post("/", function (req, res) {
   var username = req.body.username;
@@ -219,3 +183,4 @@ app.post("/register", function (req, res) {
 app.listen(PORT, () => {
   console.log(`server started on port ${PORT}`);
 });
+app.listen(5000);
