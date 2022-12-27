@@ -117,7 +117,9 @@ app.get("/islands", function (req, res) {
   else res.redirect("/");
 });
 app.get("/wanttogo", function (req, res) {
-  res.render("wanttogo", { list: [] });
+  if(session.userid)
+  res.render("wanttogo", { list: session["wanttogo"] });
+  else res.redirect("/");
 });
 
 app.post("/paris", function (req, res) {
@@ -145,7 +147,9 @@ app.post("/wanttogo-inca", function (req, res) {
   addDestinationToDB("inca");
 });
 
-function addDestinationToDB(dest) {}
+function addDestinationToDB(dest) {
+  session["wanttogo"].push(dest);
+}
 
 app.post("/wanttogo-annapurna", function (req, res) {
   res.redirect("/annapurna");
@@ -159,6 +163,7 @@ app.post("/", function (req, res) {
   if (username == "admin" && password == "admin") {
     session = req.session;
     session.userid = req.body.username;
+    session["wanttogo"] = [];
     res.redirect("home");
   } else {
     alert("invalid credentials");
@@ -183,4 +188,4 @@ app.post("/register", function (req, res) {
 app.listen(PORT, () => {
   console.log(`server started on port ${PORT}`);
 });
-//app.listen(5000);
+app.listen(5000);
