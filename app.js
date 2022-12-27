@@ -4,7 +4,6 @@ const sessions = require("express-session");
 var path = require("path");
 var fs = require("fs");
 var alert = require("alert");
-const { ObjectID } = require("mongodb");
 const dest = ["santorini", "bali", "rome", "paris", "inca", "annapurna"];
 const destNames = [
   "santorini island",
@@ -40,9 +39,9 @@ app.get("/logout", (req, res) => {
 });
 app.get("/", function (req, res) {
   session = req.session;
-  console.log(session.userid);
+
   if (session.userid) {
-    res.redirect("home");
+    res.redirect("/home");
   } else res.render("login", { error: "" });
 });
 
@@ -116,20 +115,7 @@ app.get("/islands", function (req, res) {
   else res.redirect("/");
 });
 app.get("/wanttogo", function (req, res) {
-  session = req.session;
-  if (session.userid) {
-    MongoClient.connect(URI, function (err, client) {
-      if (err) throw err;
-      var db = client.db("myDB");
-      db.collection("myCollection").findOne(
-        { username: session.userid },
-        (err, result) => {
-          res.render("wanttogo", { list: result.wantToGo });
-          console.log(result);
-        }
-      );
-    });
-  } else res.redirect("/");
+  res.render("wanttogo", { list: [] });
 });
 
 app.post("/paris", function (req, res) {
@@ -158,37 +144,39 @@ app.post("/wanttogo-inca", function (req, res) {
 });
 
 function addDestinationToDB(dest) {
-  MongoClient.connect(URI, function (err, client) {
-    if (err) throw err;
-    var db = client.db("myDB");
+  if (false) {
+    MongoClient.connect(URI, function (err, client) {
+      if (err) throw err;
+      var db = client.db("myDB");
 
-    db.collection("myCollection")
-      .find()
-      .toArray(function (err, result) {
-        for (i = 0; i < result.length; i++) {
-          var str = JSON.stringify(result[i]);
-          var user = JSON.parse(str);
-          if (user.username == session.userid) {
-            var list = JSON.parse(JSON.stringify(user.wantToGo));
-            console.log(list);
-            if (!list.includes(dest)) {
-              list.push(dest);
-            } else alert("you already added this destination before");
+      db.collection("myCollection")
+        .find()
+        .toArray(function (err, result) {
+          for (i = 0; i < result.length; i++) {
+            var str = JSON.stringify(result[i]);
+            var user = JSON.parse(str);
+            if (user.username == session.userid) {
+              var list = JSON.parse(JSON.stringify(user.wantToGo));
+              console.log(list);
+              if (!list.includes(dest)) {
+                list.push(dest);
+              } else alert("you already added this destination before");
 
-            console.log(list);
+              console.log(list);
 
-            db.collection("myCollection").updateOne(
-              { username: user.username },
-              {
-                $set: {
-                  wantToGo: list,
-                },
-              }
-            );
+              db.collection("myCollection").updateOne(
+                { username: user.username },
+                {
+                  $set: {
+                    wantToGo: list,
+                  },
+                }
+              );
+            }
           }
-        }
-      });
-  });
+        });
+    });
+  }
 }
 
 app.post("/wanttogo-annapurna", function (req, res) {
@@ -201,70 +189,30 @@ const URI = "mongodb://127.0.0.1:27017";
 app.post("/", function (req, res) {
   var username = req.body.username;
   var password = req.body.password;
-  MongoClient.connect(URI, function (err, client) {
-    if (err) throw err;
-    var db = client.db("myDB");
 
-    db.collection("myCollection")
-      .find()
-      .toArray(function (err, result) {
-        var flag = 0;
-        for (i = 0; i < result.length; i++) {
-          var str = JSON.stringify(result[i]);
-          var user = JSON.parse(str);
-          if (user.username == username && user.password == password) flag = 1;
-        }
-        if (flag == 1) {
-          session = req.session;
-          session.userid = req.body.username;
-          res.redirect("home");
-        } else {
-          alert("invalid credentials");
-          res.render("login", { error: "" });
-        }
-      });
-  });
+  if (username == "admin" && password == "admin") {
+    session = req.session;
+    session.userid = req.body.username;
+    res.redirect("home");
+  } else {
+    alert("invalid credentials");
+    res.render("login", { error: "" });
+  }
 });
 
 app.post("/register", function (req, res) {
   var username = req.body.username;
   var password = req.body.password;
-  console.log(username);
-  console.log(password);
-  if (!username || !password || username == "" || password == "") {
+
+  if (username == "admin" && password == "admin") {
+    res.redirect("/");
+    alert("registered successfully");
+  }
+ else {
     alert("please choose a username and password");
     res.render("registration");
     return;
   }
-
-  MongoClient.connect(URI, function (err, client) {
-    if (err) throw err;
-    var db = client.db("myDB");
-
-    db.collection("myCollection")
-      .find()
-      .toArray(function (err, result) {
-        var flag = 0;
-        for (i = 0; i < result.length; i++) {
-          var str = JSON.stringify(result[i]);
-          var user = JSON.parse(str);
-          if (user.username == username) flag = 1;
-        }
-        if (flag == 1) {
-          res.render("registration");
-          alert("this username is already taken");
-          return;
-        } else {
-          db.collection("myCollection").insertOne({
-            username: username,
-            password: password,
-            wantToGo: [],
-          });
-          res.redirect("/");
-          alert("registered successfully");
-        }
-      });
-  });
 });
 
 app.listen(5000);
