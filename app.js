@@ -4,6 +4,8 @@ const sessions = require("express-session");
 var path = require("path");
 var fs = require("fs");
 var alert = require("alert");
+const PORT = process.env.PORT || 3030;
+
 const dest = ["santorini", "bali", "rome", "paris", "inca", "annapurna"];
 const destNames = [
   "santorini island",
@@ -207,12 +209,13 @@ app.post("/register", function (req, res) {
   if (username == "admin" && password == "admin") {
     res.redirect("/");
     alert("registered successfully");
-  }
- else {
+  } else {
     alert("please choose a username and password");
     res.render("registration");
     return;
   }
 });
 
-app.listen(5000);
+app.listen(PORT, () => {
+  console.log(`server started on port ${PORT}`);
+});
